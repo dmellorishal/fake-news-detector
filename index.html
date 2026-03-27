@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fake News Detector</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin: 50px auto;
+            max-width: 600px;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #333;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+        }
+        .fake {
+            background: #ffe5e5;
+            border: 3px solid #ff3300;
+            color: #ff3300;
+        }
+        .real {
+            background: #e5ffe5;
+            border: 3px solid #00cc44;
+            color: #00cc44;
+        }
+        .confidence {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fake News Detector</h1>
+    <p>Paste any news text below and click Check</p>
+    
+    <textarea id="newsInput" placeholder="Paste news here..."></textarea>
+    <br>
+    <button id="checkBtn" onclick="checkNews()">Check</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function checkNews() {
+            const text = document.getElementById("newsInput").value;
+            const btn = document.getElementById("checkBtn");
+            const result = document.getElementById("result");
+            
+            if (text.length < 10) {
+                alert("Please enter at least 10 characters");
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+            result.style.display = "none";
+            
+            try {
+                const response = await fetch("http://localhost:8000/api/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                
+                result.className = data.is_fake ? "fake" : "real";
+                result.innerHTML = data.is_fake 
+                    ? "⚠️ This news seems FAKE" 
+                    : "✅ This news seems REAL";
+                result.innerHTML += `<div class="confidence">${data.confidence}% confidence</div>`;
+                result.style.display = "block";
+                
+            } catch (error) {
+                alert("Error! Make sure backend is running.\nRun: python server.py");
+            }
+            
+            btn.disabled = false;
+            btn.textContent = "Check";
+        }
+    </script>
+</body>
+</html>
