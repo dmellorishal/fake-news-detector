@@ -2,6 +2,6 @@ fastapi==0.110.1
 uvicorn==0.25.0
 scikit-learn==1.4.0
 joblib==1.3.2
-numpy==1.26.0
+numpy
 pydantic==2.6.0
 GoogleNews==1.6.16
